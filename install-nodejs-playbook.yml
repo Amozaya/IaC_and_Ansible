@@ -1,0 +1,30 @@
+# creating a playbook to install nodejs
+
+
+---
+# destination where to install nodejs
+
+- hosts: web
+
+# display the logs?
+  gather_facts: yes
+
+# allow admin access?
+  become: true
+
+# add the instructions - commands
+  - name: Install Nodejs
+    apt:
+      name: nodejs
+      state: present
+  - name: Install npm
+    apt:
+      name: npm
+      state: present
+
+  - name: Install python
+    apt:
+      name: python
+      state: present
+
+# ensure the status of nodejs

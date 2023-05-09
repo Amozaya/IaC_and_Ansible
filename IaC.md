@@ -192,5 +192,42 @@ sudo apt upgrade -y
   * `-a "src=/etc/ansible/test.txt dest=/home/vagrant"` - attribute that specifies a source, where file located on the controller, and the destination folder, where file will be copied on the `web` machine
 
 
+  ## Creating YAML playbook
+
+  1. `sudo nano install-nginx-playbook.yaml` - create new YAML playbook
+
+  2. Add following script:
+
+  ```
+
+  # creating a playbook to install nginx web server
+
+  # YAML file starts with ---
+  ---
+  # where would you like to install nginx
+  - hosts: web
+
+  # would you like to see logs (optional)
+    gather_facts: yes
+
+  # do we need admin access "sudo"
+    become: true
+
+  # add the instructions - commands
+  tasks:
+    - name: Install nginx in web-server
+
+      apt: pkg=nginx state=present
+
+  # ensure status is active
+
+  ```
+
+3. `sudo ansible-playbook install-nginx-playbook.yml` - run yaml playbook
+
+4. `sudo ansible web -a "systemctl status nginx"` - check status of nginx on the `web` VM
+
+
+
 
 
