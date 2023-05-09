@@ -33,6 +33,8 @@ The primary goal is to configure a server. You can use tools like Ansible in ord
 
 ### What is Ansible
 
+![Ansible diagram](resources/AnsibleDiagram.JPG)
+
 Ansible is an open source automation tool that automates provisioning, configuration management, application deployment and many more other processes. Ansible can be used to automate software installation, daily tasks, provisioning, system patching etc.
 
 ### Ansible playbook
@@ -124,3 +126,71 @@ This code will create 3 separate VMs: controller, web, and db
 15. Run `sudo apt instal ansible -y`
 16. Use `ansible --version` to ensure Ansible is installed and it is correct version
 17. You can use `ssh vagrant@<VM_IP>` to connect to the specific VM through your controller. It will ask you to add the password for your connection. *!When typing the password it wont be visible in the CLI for security reason!*
+
+## Use controller and agent nodes with Ansible
+1. Use `Vagrant up` to start VMs and then connect to `controller` VM vis GitBash terminal using `vagrant ssh controller`
+2. `cd /etc/ansible/` - navigate to default Ansible directory
+3. `ls` - check in `ansible.cnf` and `hosts` exists
+4. `sudo apt install tree` - install tree package
+5. `tree` - use the command to see the list of files instead of `ls`
+6. `sudo ansible all -m ping` - check connections with agent nodes:
+  * `-m` - module
+  * `all` - looks for all agent nodes
+  * `ping` - ping the agent nodes to check connection
+
+7. `ssh vagrant@192.168.33.10` - connect to `web` VM
+8. Upgrade and update `web` VM
+```
+sudo apt update -y`
+sudo apt upgrade -y
+```
+9. `exit` - return back to controller
+10. `ssh vagrant@192.168.33.11` - connect to `db` VM
+11. Update and upgrade the `db` VM
+```
+sudo apt update -y
+sudo apt upgrade -y
+```
+12. `exit` - return back to controller
+13. `pwd` - use to ensure you are still in `etc/ansible/` directory
+
+14. `sudo nano hosts` - open hosts file
+
+15. Add the following lines of code: 
+```
+[web]
+192.168.33.10
+```
+16. `sudo ansible web -m ping` - will give an error about public key
+17. `sudo nano hosts` - to go back to hosts file
+18. `192.168.33.10 ansible_connection=ssh ansible_ssh_user=vagrant ansible_ssh_pass=vagrant` - we verify the connection: type ssh, user vagrant, and password vagrant"
+19. `sudo ansible web -m ping` - now this time connection should work
+
+20. `sudo nano hosts`
+21. Add following lines to connect to `db` VM
+```
+[db]
+192.168.33.11 ansible_connection=ssh ansible_ssh_user=vagrant ansible_ssh_pass=vagrant`
+```
+  If connection is not verified do the following steps:
+  * `sudo nano ansible.cfg`
+  * add `host_key_checking = false` under `[defaults]`
+22. `sudo ansible all -m ping` - now both VMs should be connected and responding
+
+### Ansible ad hoc commands
+
+* `sudo ansible all -a "date"` - date and timezone for each machine
+* `sudo ansible all -a "uname -a"` - information about each machine
+* `sudo ansible all -a "free"` - shows free memory on each machine
+
+
+* `sudo nano test.txt` - create test txt file
+* add `# testing data transfer from controller to web-vm using adhoc command`
+* use`sudo ansible web -m copy -a "src=/etc/ansible/test.txt dest=/home/vagrant"` to copy file over to `web` VM:
+  * `web` - agent node where we want to copy to
+  * `-m copy` - module copy, that will create a copy of the file
+  * `-a "src=/etc/ansible/test.txt dest=/home/vagrant"` - attribute that specifies a source, where file located on the controller, and the destination folder, where file will be copied on the `web` machine
+
+
+
+
