@@ -393,3 +393,30 @@ sudo apt upgrade -y
 7. Use `npm install`
 8. Use `node app.js &`
 9. Type `192.168.33.10:3000/posts` in your browser to check if the app is launched and posts page is working
+
+### Update app-env.yml
+I updated playbook for app-env in order to add DB_HOST to .bashrc file:
+```
+# playbook to create an env variable for DB_HOST
+
+---
+
+- hosts: db
+
+  gather_facts: yes
+
+  become: true
+
+# commands to create env variable
+
+  tasks:
+  - name: create DB_HOST
+    shell: echo 'export DB_HOST=mongodb://192.168.33.10:27017/posts' >> /home/vagrant/.bashrc
+
+  - name: restart .bashrc
+    shell: source /home/vagrant/.bashrc && source .bashrc
+    args:
+      executable: /bin/bash
+# use Adhoc command to check if DB_HOST exists
+
+```
