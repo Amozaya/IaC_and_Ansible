@@ -22,6 +22,8 @@ Automating infrastructure provisioning with IaC means that developers don't need
 ### Use cases of IaC
 
 * In software development life cycle. When the environments are uniform the chance of the bugs is much lower, as well as it reduces the time required for deployment and configuration of all the environments. 
+* IaC 
+* Some of the large known companies that are using IaC are Netflix and Google. They use IaC in order to help them to manage their large scale infrastructure efficiently. 
 
 
 ### Configuration management
@@ -228,6 +230,81 @@ sudo apt upgrade -y
 4. `sudo ansible web -a "systemctl status nginx"` - check status of nginx on the `web` VM
 
 
+## Create a Playbook to install nodejs and npm for a SpartaApp
+
+1. Create a new playbook file using `sudo nano install-nodejs-playbook.yml`
+
+2. Add the following YAML code to the playbook:
+```
+# creating a playbook to install nodejs
 
 
+---
+# destination where to install nodejs
 
+- hosts: web
+
+# display the logs?
+  gather_facts: yes
+
+# allow admin access?
+  become: true
+
+# add the instructions - commands
+  tasks:
+  - name: Install Nodejs
+    apt:
+      name: nodejs
+      state: present
+  - name: Install npm
+    apt:
+      name: npm
+      state: present
+
+  - name: Install python
+    apt:
+      name: python
+      state: present
+
+# ensure the status of nodejs
+
+```
+
+3. Use the following code to copy the app to your agen node `scp -r <source_location> <destination_location>, where:
+    * <source location> is `/c/Users/olegf/app`
+    * <destination_location> is `vagrant@192.168.33.10:/home/vagrant`
+
+4. Now you can launch the app:
+    4.1 `ssh vagrant@192.168.33.10` to connect to web machine
+    4.2 `cd app` to navigate to app folder
+    4.3 `node app.js &` to run the app in the background
+
+5. Use `192.168.33.10:3000` to verify that app is working in the browser
+
+
+## Create a Playbook file to install Mongodb on the database server
+
+1. `sudo nano mongo-db-playbook.yml` - create a new playbook for Mongodb
+2. Type in the following YAML script:
+
+```
+# this playbook will install mongodb on the database server
+---
+# location where it will be installed
+- hosts: web
+# display the logs
+  gather_facts: yes
+# give admin permission
+  become: true
+
+# adding commands to install mongo db and status running
+  tasks:
+  - name: configuring Mongo-db in db agent
+    apt: pkg=mongodb state=present
+
+# check status with Adhoc command
+
+```
+
+3. Run the playbook `sudo ansible-playbook mongo-db-playbook.yml`
+4. Check the status of mongodb `sudo ansible db -a "systemctl status mongodb`
