@@ -308,3 +308,88 @@ sudo apt upgrade -y
 
 3. Run the playbook `sudo ansible-playbook mongo-db-playbook.yml`
 4. Check the status of mongodb `sudo ansible db -a "systemctl status mongodb`
+
+
+## Connect the app to database and seed the data
+
+1. Use `ssh vagrant@192.168.33.11` to connect to db machine
+2. Use `sudo nano /etc/mongod.conf` to edit mongod configuration file
+3. Change bind_ip to `0.0.0.0`
+4. Restart mongodb using `sudo systemctl restart mongodb`
+5. Enable `sudo systemctl enable mongodb`
+6. Check the status if it's active `sudo systemctl status mongodb`
+7. Connect to your `web` machine
+8. Use `export DB_HOST=mongodb://192.168.33.10:27017/posts` to create environment variable
+9. Use `prinenv DB_HOST` to check if variable exists
+10. `cd app`
+11. Use `npm install`
+12. Use `node app.js &`
+13. Type `192.168.33.10:3000/posts` in order to check if posts page is working
+
+
+## Create a playbook to configure mongodb.conf file
+
+1. In controller machine create a new playbook `sudo nano mongo-cong.yml`
+2. Add the following code:
+```
+# playbook to configure mongodb on the db machine
+---
+
+- hosts: db
+
+  gather_facts: yes
+
+  become: true
+
+# commands to configure mongodb.conf
+  tasks:
+  - name: change bing_ip in mongodb.conf
+    lineinfile:
+      path: /etc/mongodb.conf
+      regexp: 'bind_ip = 0.0.0.10'
+      line: 'bind_ip = 0.0.0.0'
+      backrefs: yes
+
+  - name: restart mongodb
+    shell: systemctl restart mongodb
+
+  - name: enable mongodb
+    shell: systemctl enable mongodb
+
+# use ad hoc commands to check if mondodb is active
+```
+
+3. Use `sudo ansible-playbook mongo-cong.yml` to run the playbook
+4. Use `sudo ansible web -a "systemctl status monodb` to check if mondogb running
+
+
+## Create a playbook to add env variable DB_HOST to web machine
+
+1. In controller machine create a new playbook `sudo nano app-env.yml`
+2. Add the following code:
+```
+# playbook to create an env variable for DB_HOST
+
+---
+
+- hosts: db
+
+  gather_facts: yes
+
+  become: true
+
+# commands to create env variable
+
+  tasks:
+  - name: create DB_HOST
+    shell: export DB_HOST=mongodb://192.168.33.11:27017/posts
+
+# use Adhoc command to check if DB_HOST exists
+```
+3. Use `sudo ansible-playbook mongo-cong.yml` to run the playbook
+4. Coonect to web machine using `ssh vagrant@192.168.33.10`
+5. You can use `printenv DB_HOST` to check if variable was created
+6. `cd app`
+7. Use `npm install`
+8. Use `node app.js &`
+9. Type `192.168.33.10:3000/posts` in your browser to check if the app is launched and posts page is working
