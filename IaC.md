@@ -372,7 +372,7 @@ sudo apt upgrade -y
 
 ---
 
-- hosts: db
+- hosts: web
 
   gather_facts: yes
 
@@ -386,7 +386,7 @@ sudo apt upgrade -y
 
 # use Adhoc command to check if DB_HOST exists
 ```
-3. Use `sudo ansible-playbook mongo-cong.yml` to run the playbook
+3. Use `sudo ansible-playbook app-env.yml` to run the playbook
 4. Coonect to web machine using `ssh vagrant@192.168.33.10`
 5. You can use `printenv DB_HOST` to check if variable was created
 6. `cd app`
